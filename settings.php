@@ -112,4 +112,10 @@ if ($ADMIN->fulltree) {
     ));
 
     $settings->add($setting);
+
+    $name = 'block_lw_courses/displaybutton';
+    $title = new lang_string('displaybutton', 'block_lw_courses');
+    $description = new lang_string('displaybutton_desc', 'block_lw_courses');
+    $setting = new admin_setting_configcheckbox($name, $title, $description, 0);
+    $settings->add($setting);
 }

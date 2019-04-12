@@ -44,6 +44,10 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         // LearningWorks.
         $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/lw_courses/js/custom.js'));
         $config = get_config('block_lw_courses');
+        if ($config->showcategories != BLOCKS_LW_COURSES_SHOWCATEGORIES_NONE) {
+            global $CFG;
+            require_once($CFG->libdir.'/coursecatlib.php');
+        }
         $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
         $ismovingcourse = false;
         $courseordernumber = 0;
@@ -83,8 +87,8 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             // Create move icon, so it can be used.
             $movetofirsticon = html_writer::empty_tag('img',
                 array('src' => $moveicon,
-                    'alt' => get_string('movetofirst', 'block_lw_courses', $courses[$movingcourseid]->fullname),
-                    'title' => get_string('movehere')));
+                      'alt' => get_string('movetofirst', 'block_lw_courses', $courses[$movingcourseid]->fullname),
+                      'title' => get_string('movehere')));
             $moveurl = html_writer::link($moveurl, $movetofirsticon);
             $html .= html_writer::tag('div', $moveurl, array('class' => 'movehere'));
         }
@@ -108,7 +112,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             $courseclass = "list";
         } else {
             $html .= html_writer::tag('a', 'Change View', array('href' => '#', 'id' => 'box-or-lines',
-            'styles' => '', 'class' => "$courseclass col-md-$startvalue span$startvalue $courseclass"));
+                                                                'styles' => '', 'class' => "$courseclass col-md-$startvalue span$startvalue $courseclass"));
         }
         $html .= html_writer::tag('div', '', array("class" => "hidden startgrid $courseclass", "grid-size" => $gridsplit));
         $html .= html_writer::div('', 'box flush');
@@ -159,10 +163,10 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             if ($userediting && !$ismovingcourse) {
                 $moveicon = html_writer::empty_tag('img',
                     array('src' => $moveicon->out(false),
-                        'alt' => get_string('movecourse', 'block_lw_courses', $course->fullname),
-                        'title' => get_string('move')));
+                          'alt' => get_string('movecourse', 'block_lw_courses', $course->fullname),
+                          'title' => get_string('move')));
                 $moveurl = new moodle_url($this->page->url, array('sesskey' => sesskey(), 'movecourse' => 1,
-                    'courseid' => $course->id));
+                                                                  'courseid' => $course->id));
                 $moveurl = html_writer::link($moveurl, $moveicon);
                 $html .= html_writer::tag('div', $moveurl, array('class' => 'move'));
             }
@@ -179,11 +183,11 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 $html .= $this->output->heading($link, 2, 'title');
             } else {
                 $html .= $this->output->heading(html_writer::link(
-                       new moodle_url('/auth/mnet/jump.php', array(
-                       'hostid' => $course->hostid,
-                       'wantsurl' => '/course/view.php?id='.$course->remoteid)),
-                       format_string($course->shortname, true), $attributes) .
-                       ' (' . format_string($course->hostname) . ')', 2, 'title');
+                        new moodle_url('/auth/mnet/jump.php', array(
+                            'hostid' => $course->hostid,
+                            'wantsurl' => '/course/view.php?id='.$course->remoteid)),
+                        format_string($course->shortname, true), $attributes) .
+                    ' (' . format_string($course->hostname) . ')', 2, 'title');
             }
             $html .= $this->output->box('', 'flush');
             $html .= html_writer::end_tag('div');
@@ -205,12 +209,12 @@ class block_lw_courses_renderer extends plugin_renderer_base {
 
             if ($config->showcategories != BLOCKS_LW_COURSES_SHOWCATEGORIES_NONE) {
                 // List category parent or categories path here.
-                $currentcategory = core_course_category::get($course->category, IGNORE_MISSING);
+                $currentcategory = coursecat::get($course->category, IGNORE_MISSING);
                 if ($currentcategory !== null) {
                     $html .= html_writer::start_tag('div', array('class' => 'categorypath'));
                     if ($config->showcategories == BLOCKS_LW_COURSES_SHOWCATEGORIES_FULL_PATH) {
                         foreach ($currentcategory->get_parents() as $categoryid) {
-                            $category = core_course_category::get($categoryid, IGNORE_MISSING);
+                            $category = coursecat::get($categoryid, IGNORE_MISSING);
                             if ($category !== null) {
                                 $html .= $category->get_formatted_name().' / ';
                             }
@@ -239,8 +243,8 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 $a->currentcoursename = $course->fullname;
                 $movehereicon = html_writer::empty_tag('img',
                     array('src' => $movehere,
-                        'alt' => get_string('moveafterhere', 'block_lw_courses', $a),
-                        'title' => get_string('movehere')));
+                          'alt' => get_string('moveafterhere', 'block_lw_courses', $a),
+                          'title' => get_string('movehere')));
                 $moveurl = html_writer::link($moveurl, $movehereicon);
                 $html .= html_writer::tag('div', $moveurl, array('class' => 'movehere'));
             }
@@ -448,7 +452,8 @@ class block_lw_courses_renderer extends plugin_renderer_base {
     public function course_image($course) {
         global $CFG;
 
-        $course = new core_course_list_element($course);
+        require_once($CFG->libdir.'/coursecatlib.php');
+        $course = new course_in_list($course);
         // Check to see if a file has been set on the course level.
         if ($course->id > 0 && $course->get_course_overviewfiles()) {
             foreach ($course->get_course_overviewfiles() as $file) {
@@ -459,7 +464,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 if ($isimage) {
                     $config = get_config('block_lw_courses');
                     if (is_null($config->lw_courses_bgimage) ||
-                         $config->lw_courses_bgimage == BLOCKS_LW_COURSES_IMAGEASBACKGROUND_FALSE) {
+                        $config->lw_courses_bgimage == BLOCKS_LW_COURSES_IMAGEASBACKGROUND_FALSE) {
                         // Embed the image url as a img tag sweet...
                         $image = html_writer::empty_tag('img', array('src' => $url, 'class' => 'course_image'));
                         return html_writer::div($image, 'image_wrap');
@@ -513,7 +518,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         } else {
             // We need a CSS solution apparently lets give it to 'em.
             return html_writer::div('', 'course_image_embed',
-                    array("style" => 'background-image:url('.$imageurl.'); background-size:cover'));
+                array("style" => 'background-image:url('.$imageurl.'); background-size:cover'));
         }
         // Where are the default at even?.
         return print_error('filenotreadable');
@@ -523,14 +528,27 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Get the Course description for a given course
      *
      * @param object $course The course whose description we want
+     *
      * @return string
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
      */
     public function course_description($course) {
-        $course = new core_course_list_element($course);
+        $course = new course_in_list($course);
 
         $context = \context_course::instance($course->id);
         $summary = external_format_string($course->summary, $context,
-                1, array());
+            1, array());
+
+        if(get_config('block_lw_courses' , 'displaybutton')){
+            $summary .= html_writer::link(new moodle_url('/course/view.php' , [
+                'id' => $course->id
+            ]) , get_string('viewcourse' , 'block_lw_courses') , [
+                'class' => 'btn btn-primary viewcourse'
+            ]);
+        }
+
         return html_writer::div($summary, 'course_description');
     }
 

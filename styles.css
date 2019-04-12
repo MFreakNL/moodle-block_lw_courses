@@ -448,6 +448,13 @@
     text-decoration: none;
 }
 
+.block_lw_courses .lw_courses_list a.btn.viewcourse {
+    display: block;
+    width: fit-content;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+}
 
 .lw_courses_list .coursebox:not(.span12) .categorypath {
     position: absolute;

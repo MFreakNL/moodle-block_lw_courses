@@ -66,6 +66,9 @@ $string['view_edit_profile'] = '(View and edit your profile.)';
 $string['welcome'] = 'Welcome {$a}';
 $string['youhavemessages'] = 'You have {$a} unread ';
 $string['youhavenomessages'] = 'You have no unread ';
+$string['displaybutton'] = 'Display button';
+$string['displaybutton_desc'] = 'Display a open course button';
+$string['viewcourse'] = 'Open course';
 
 $string['unset'] = "Unset";
 $string['coursegridwidth'] = "Grid size";
