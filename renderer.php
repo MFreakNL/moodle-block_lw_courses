@@ -466,7 +466,9 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                     if (is_null($config->lw_courses_bgimage) ||
                         $config->lw_courses_bgimage == BLOCKS_LW_COURSES_IMAGEASBACKGROUND_FALSE) {
                         // Embed the image url as a img tag sweet...
-                        $image = html_writer::empty_tag('img', array('src' => $url, 'class' => 'course_image'));
+                        $image = $this->enrolment_duration($course);
+                        $image .= html_writer::empty_tag('img', array('src' => $url, 'class' => 'course_image'));
+
                         return html_writer::div($image, 'image_wrap');
                     } else {
                         // We need a CSS soloution apparently lets give it to em.
@@ -583,5 +585,30 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         $output = substr($s, 0, $l = min(strlen($s), $l + $i)) .
             $e . (count($tags = array_reverse($tags)) ? '</' . implode('></', $tags) . '>' : '');
         return $output;
+    }
+
+    /**
+     * @param $course
+     *
+     * @return string
+     * @throws Exception
+     */
+    private function enrolment_duration($course) {
+
+        if(empty($course->enrolment_end)){
+            return '';
+        }
+
+        $seconds = $course->enrolment_end - time();
+
+        $dtF = new DateTime("@0");
+        $dtT = new DateTime("@$seconds");
+        $days = $dtF->diff($dtT)->format('%a');
+        if ($days >= 0) {
+            return '<span class="badge badge-success"> ' . get_string('enrolmentsends', 'block_lw_courses')
+                .' '. (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
+        }
+
+        return '';
     }
 }

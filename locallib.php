@@ -170,17 +170,138 @@ function block_lw_courses_get_max_user_courses($showallcourses = false) {
 }
 
 /**
+ * Returns list of courses userID is enrolled in and can access
+ *
+ * - $fields is an array of field names to ADD
+ *   so name the fields you really need, which will
+ *   be added and uniq'd
+ *
+ * @param int          $userId
+ * @param string|array $fields
+ * @param string       $sort
+ * @param int          $limit max number of courses
+ *
+ * @return array
+ * @throws coding_exception
+ * @throws dml_exception
+ */
+function block_lw_courses_get_my_courses($userId = 0, $fields = null, $sort = 'sortorder ASC', $limit = 0) {
+    global $DB;
+
+    // Guest account does not have any courses
+    if (isguestuser() or !isloggedin()) {
+        return ([]);
+    }
+
+    $basefields = [
+        'id',
+        'category',
+        'sortorder',
+        'shortname',
+        'fullname',
+        'idnumber',
+        'startdate',
+        'visible',
+        'groupmode',
+        'groupmodeforce',
+        'cacherev',
+    ];
+
+    if (empty($fields)) {
+        $fields = $basefields;
+    } else {
+        if (is_string($fields)) {
+            // turn the fields from a string to an array
+            $fields = explode(',', $fields);
+            $fields = array_map('trim', $fields);
+            $fields = array_unique(array_merge($basefields, $fields));
+        } else {
+            if (is_array($fields)) {
+                $fields = array_unique(array_merge($basefields, $fields));
+            } else {
+                throw new coding_exception('Invalid $fileds parameter in enrol_get_my_courses()');
+            }
+        }
+    }
+    if (in_array('*', $fields)) {
+        $fields = ['*'];
+    }
+
+    $orderby = "";
+    $sort = trim($sort);
+    if (!empty($sort)) {
+        $rawsorts = explode(',', $sort);
+        $sorts = [];
+        foreach ($rawsorts as $rawsort) {
+            $rawsort = trim($rawsort);
+            if (strpos($rawsort, 'c.') === 0) {
+                $rawsort = substr($rawsort, 2);
+            }
+            $sorts[] = trim($rawsort);
+        }
+        $sort = 'c.' . implode(',c.', $sorts);
+        $orderby = "ORDER BY $sort";
+    }
+
+    $wheres = ["c.id <> :siteid"];
+    $params = ['siteid' => SITEID];
+
+    $coursefields = 'c.' . join(',c.', $fields);
+    $ccselect = ', ' . context_helper::get_preload_record_columns_sql('ctx');
+    $ccjoin = "LEFT JOIN {context} ctx ON (ctx.instanceid = c.id AND ctx.contextlevel = :contextlevel)";
+    $params['contextlevel'] = CONTEXT_COURSE;
+    $wheres = implode(" AND ", $wheres);
+
+    //note: we can not use DISTINCT + text fields due to Oracle and MS limitations, that is why we have the subselect there
+    $sql = "SELECT $coursefields $ccselect
+              FROM {course} c
+              JOIN (SELECT DISTINCT e.courseid
+                      FROM {enrol} e
+                      JOIN {user_enrolments} ue ON (ue.enrolid = e.id AND ue.userid = :userid)
+                     WHERE ue.status = :active AND e.status = :enabled
+                   ) en ON (en.courseid = c.id)
+           $ccjoin
+             WHERE $wheres
+          $orderby";
+    $params['userid'] = $userId;
+    $params['active'] = ENROL_USER_ACTIVE;
+    $params['enabled'] = ENROL_INSTANCE_ENABLED;
+    // $params['now1'] = time(); // improves db caching
+    // $params['now2'] = $params['now1'];
+
+    $courses = $DB->get_records_sql($sql, $params, 0, $limit);
+
+    // preload contexts and check visibility
+    foreach ($courses as $id => $course) {
+        context_helper::preload_from_record($course);
+        if (!$course->visible) {
+            if (!$context = context_course::instance($id, IGNORE_MISSING)) {
+                unset($courses[$id]);
+                continue;
+            }
+        }
+        $course->enrolment_end = enrol_get_enrolment_end($id, $userId);
+        $courses[$id] = $course;
+    }
+
+    return $courses;
+}
+
+/**
  * Return sorted list of user courses
  *
  * @param bool $showallcourses if set true all courses will be visible.
+ *
  * @return array list of sorted courses and count of courses.
+ * @throws coding_exception
+ * @throws dml_exception
+ * @throws moodle_exception
  */
 function block_lw_courses_get_sorted_courses($showallcourses = false) {
     global $USER;
 
     $limit = block_lw_courses_get_max_user_courses($showallcourses);
-
-    $courses = enrol_get_my_courses();
+    $courses = block_lw_courses_get_my_courses($USER->id);
     $site = get_site();
 
     if (array_key_exists($site->id, $courses)) {

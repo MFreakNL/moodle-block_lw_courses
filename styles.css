@@ -112,6 +112,9 @@
     float: left;
     height: 100%;
 }
+.block_lw_courses .coursebox.span12 .image_wrap .badge{
+    position: absolute;
+}
 .block_lw_courses .coursebox:not(.span12) .image_wrap {
     position: absolute;
     top: 0;
@@ -450,7 +453,7 @@
 
 .block_lw_courses .lw_courses_list a.btn.viewcourse {
     display: block;
-    width: fit-content;
+    width: auto;
     position: absolute;
     right: 15px;
     bottom: 15px;
