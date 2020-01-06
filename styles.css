@@ -114,6 +114,11 @@
 }
 .block_lw_courses .coursebox.span12 .image_wrap .badge{
     position: absolute;
+    bottom: 16px;
+}
+.block_lw_courses .coursebox.span12 .image_wrap .badge-red {
+    background: red;
+    color:#fff;
 }
 .block_lw_courses .coursebox:not(.span12) .image_wrap {
     position: absolute;
