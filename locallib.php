@@ -298,17 +298,19 @@ function block_lw_courses_get_my_courses($userId = 0, $fields = null, $sort = 's
  * @throws moodle_exception
  */
 function block_lw_courses_get_sorted_courses($showallcourses = false) {
-    global $USER;
+    global $USER , $DB;
 
     $limit = block_lw_courses_get_max_user_courses($showallcourses);
     $courses = block_lw_courses_get_my_courses($USER->id);
+    $mapping = $DB->get_records_menu('block_webshop_product' , [] ,'', 'course_id as id, locale');
     $site = get_site();
 
     if (array_key_exists($site->id, $courses)) {
         unset($courses[$site->id]);
     }
 
-    foreach ($courses as $c) {
+    foreach ($courses as &$c) {
+        $c->locale_mapping = $mapping[$c->id] ?? '';
         if (isset($USER->lastcourseaccess[$c->id])) {
             $courses[$c->id]->lastaccess = $USER->lastcourseaccess[$c->id];
         } else {

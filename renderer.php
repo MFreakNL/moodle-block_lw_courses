@@ -24,6 +24,7 @@
  */
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->libdir . '/externallib.php');
+
 /**
  * lw_courses block rendrer
  *
@@ -36,19 +37,20 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Construct contents of lw_courses block
      *
      * @param array $courses list of courses in sorted order
+     *
      * @return string html to be displayed in lw_courses block
      */
     public function lw_courses($courses) {
         global $CFG, $PAGE, $DB, $OUTPUT;
         $html = '';
         // LearningWorks.
-        $PAGE->requires->js(new moodle_url($CFG->wwwroot.'/blocks/lw_courses/js/custom.js'));
+        $PAGE->requires->js(new moodle_url($CFG->wwwroot . '/blocks/lw_courses/js/custom.js'));
         $config = get_config('block_lw_courses');
         if ($config->showcategories != BLOCKS_LW_COURSES_SHOWCATEGORIES_NONE) {
             global $CFG;
-            require_once($CFG->libdir.'/coursecatlib.php');
+            require_once($CFG->libdir . '/coursecatlib.php');
         }
-        $role = $DB->get_record('role', array('shortname' => 'editingteacher'));
+        $role = $DB->get_record('role', ['shortname' => 'editingteacher']);
         $ismovingcourse = false;
         $courseordernumber = 0;
         $userediting = false;
@@ -76,7 +78,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             $html .= $this->output->box_end();
 
             $moveurl = new moodle_url('/blocks/lw_courses/move.php',
-                array('sesskey' => sesskey(), 'moveto' => 0, 'courseid' => $movingcourseid));
+                ['sesskey' => sesskey(), 'moveto' => 0, 'courseid' => $movingcourseid]);
             if (method_exists($this->output, 'image_url')) {
                 // Use the new method.
                 $moveicon = $this->output->image_url('movehere');
@@ -86,11 +88,13 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             }
             // Create move icon, so it can be used.
             $movetofirsticon = html_writer::empty_tag('img',
-                array('src' => $moveicon,
-                      'alt' => get_string('movetofirst', 'block_lw_courses', $courses[$movingcourseid]->fullname),
-                      'title' => get_string('movehere')));
+                [
+                    'src' => $moveicon,
+                    'alt' => get_string('movetofirst', 'block_lw_courses', $courses[$movingcourseid]->fullname),
+                    'title' => get_string('movehere'),
+                ]);
             $moveurl = html_writer::link($moveurl, $movetofirsticon);
-            $html .= html_writer::tag('div', $moveurl, array('class' => 'movehere'));
+            $html .= html_writer::tag('div', $moveurl, ['class' => 'movehere']);
         }
 
         // LearningWorks.
@@ -111,17 +115,21 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             $startvalue = 12;
             $courseclass = "list";
         } else {
-            $html .= html_writer::tag('a', 'Change View', array('href' => '#', 'id' => 'box-or-lines',
-                                                                'styles' => '', 'class' => "$courseclass col-md-$startvalue span$startvalue $courseclass"));
+            $html .= html_writer::tag('a', 'Change View', [
+                'href' => '#',
+                'id' => 'box-or-lines',
+                'styles' => '',
+                'class' => "$courseclass col-md-$startvalue span$startvalue $courseclass",
+            ]);
         }
-        $html .= html_writer::tag('div', '', array("class" => "hidden startgrid $courseclass", "grid-size" => $gridsplit));
+        $html .= html_writer::tag('div', '', ["class" => "hidden startgrid $courseclass", "grid-size" => $gridsplit]);
         $html .= html_writer::div('', 'box flush');
 
         $allnames = get_all_user_name_fields(true, 'u');
-        $fields = 'u.id, u.confirmed, u.username, '. $allnames . ', ' .
-            'u.maildisplay, u.mailformat, u.maildigest, u.email, u.emailstop, u.city, '.
-            'u.country, u.picture, u.idnumber, u.department, u.institution, '.
-            'u.lang, u.timezone, u.lastaccess, u.mnethostid, u.imagealt, r.name AS rolename, r.sortorder, '.
+        $fields = 'u.id, u.confirmed, u.username, ' . $allnames . ', ' .
+            'u.maildisplay, u.mailformat, u.maildigest, u.email, u.emailstop, u.city, ' .
+            'u.country, u.picture, u.idnumber, u.department, u.institution, ' .
+            'u.lang, u.timezone, u.lastaccess, u.mnethostid, u.imagealt, r.name AS rolename, r.sortorder, ' .
             'r.shortname AS roleshortname, rn.name AS rolecoursealias';
 
         $html .= html_writer::start_div('lw_courses_list');
@@ -144,8 +152,11 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 $teachers = get_role_users($role->id, $context, false, $fields);
                 foreach ($teachers as $key => $teacher) {
                     $teachername = get_string('defaultcourseteacher') . ': ' . fullname($teacher);
-                    $teachernames .= html_writer::tag('p', $teachername, array('class' => 'teacher_name'));
-                    $teacherimages .= html_writer::div($OUTPUT->user_picture($teacher, array('size' => 50, 'class' => '')), 'teacher_image');
+                    $teachernames .= html_writer::tag('p', $teachername, ['class' => 'teacher_name']);
+                    $teacherimages .= html_writer::div($OUTPUT->user_picture($teacher, [
+                        'size' => 50,
+                        'class' => '',
+                    ]), 'teacher_image');
                 }
             }
             $teacherimages .= html_writer::end_div();
@@ -158,34 +169,40 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 // Still a pre Moodle 3.3 release. Use pix_url because image_url doesn't exist yet.
                 $moveicon = $this->pix_url('t/move');
             }
-            $html .= html_writer::start_tag('div', array('class' => 'course_title'));
+            $html .= html_writer::start_tag('div', ['class' => 'course_title']);
             // If user is editing, then add move icons.
             if ($userediting && !$ismovingcourse) {
                 $moveicon = html_writer::empty_tag('img',
-                    array('src' => $moveicon->out(false),
-                          'alt' => get_string('movecourse', 'block_lw_courses', $course->fullname),
-                          'title' => get_string('move')));
-                $moveurl = new moodle_url($this->page->url, array('sesskey' => sesskey(), 'movecourse' => 1,
-                                                                  'courseid' => $course->id));
+                    [
+                        'src' => $moveicon->out(false),
+                        'alt' => get_string('movecourse', 'block_lw_courses', $course->fullname),
+                        'title' => get_string('move'),
+                    ]);
+                $moveurl = new moodle_url($this->page->url, [
+                    'sesskey' => sesskey(),
+                    'movecourse' => 1,
+                    'courseid' => $course->id,
+                ]);
                 $moveurl = html_writer::link($moveurl, $moveicon);
-                $html .= html_writer::tag('div', $moveurl, array('class' => 'move'));
+                $html .= html_writer::tag('div', $moveurl, ['class' => 'move']);
             }
 
             // No need to pass title through s() here as it will be done automatically by html_writer.
-            $attributes = array('title' => $course->fullname);
+            $attributes = ['title' => $course->fullname];
             if ($course->id > 0) {
                 if (empty($course->visible)) {
                     $attributes['class'] = 'dimmed';
                 }
-                $courseurl = new moodle_url('/course/view.php', array('id' => $course->id));
+                $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
                 $coursefullname = format_string(get_course_display_name_for_list($course), true, $course->id);
                 $link = html_writer::link($courseurl, $coursefullname, $attributes);
                 $html .= $this->output->heading($link, 2, 'title');
             } else {
                 $html .= $this->output->heading(html_writer::link(
-                        new moodle_url('/auth/mnet/jump.php', array(
+                        new moodle_url('/auth/mnet/jump.php', [
                             'hostid' => $course->hostid,
-                            'wantsurl' => '/course/view.php?id='.$course->remoteid)),
+                            'wantsurl' => '/course/view.php?id=' . $course->remoteid,
+                        ]),
                         format_string($course->shortname, true), $attributes) .
                     ' (' . format_string($course->hostname) . ')', 2, 'title');
             }
@@ -195,7 +212,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             if (!empty($config->showchildren) && ($course->id > 0)) {
                 // List children here.
                 if ($children = block_lw_courses_get_child_shortnames($course->id)) {
-                    $html .= html_writer::tag('span', $children, array('class' => 'coursechildren'));
+                    $html .= html_writer::tag('span', $children, ['class' => 'coursechildren']);
                 }
             }
 
@@ -211,12 +228,12 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 // List category parent or categories path here.
                 $currentcategory = coursecat::get($course->category, IGNORE_MISSING);
                 if ($currentcategory !== null) {
-                    $html .= html_writer::start_tag('div', array('class' => 'categorypath'));
+                    $html .= html_writer::start_tag('div', ['class' => 'categorypath']);
                     if ($config->showcategories == BLOCKS_LW_COURSES_SHOWCATEGORIES_FULL_PATH) {
                         foreach ($currentcategory->get_parents() as $categoryid) {
                             $category = coursecat::get($categoryid, IGNORE_MISSING);
                             if ($category !== null) {
-                                $html .= $category->get_formatted_name().' / ';
+                                $html .= $category->get_formatted_name() . ' / ';
                             }
                         }
                     }
@@ -237,40 +254,44 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             }
             if ($ismovingcourse) {
                 $moveurl = new moodle_url('/blocks/lw_courses/move.php',
-                    array('sesskey' => sesskey(), 'moveto' => $courseordernumber, 'courseid' => $movingcourseid));
+                    ['sesskey' => sesskey(), 'moveto' => $courseordernumber, 'courseid' => $movingcourseid]);
                 $a = new stdClass();
                 $a->movingcoursename = $courses[$movingcourseid]->fullname;
                 $a->currentcoursename = $course->fullname;
                 $movehereicon = html_writer::empty_tag('img',
-                    array('src' => $movehere,
-                          'alt' => get_string('moveafterhere', 'block_lw_courses', $a),
-                          'title' => get_string('movehere')));
+                    [
+                        'src' => $movehere,
+                        'alt' => get_string('moveafterhere', 'block_lw_courses', $a),
+                        'title' => get_string('movehere'),
+                    ]);
                 $moveurl = html_writer::link($moveurl, $movehereicon);
-                $html .= html_writer::tag('div', $moveurl, array('class' => 'movehere'));
+                $html .= html_writer::tag('div', $moveurl, ['class' => 'movehere']);
             }
 
         }
 
         // Wrap course list in a div and return.
         $html .= html_writer::end_div();
+
         return $html;
     }
 
     /**
      * Construct activities overview for a course
      *
-     * @param int $cid course id
+     * @param int   $cid      course id
      * @param array $overview overview of activities in course
+     *
      * @return string html of activities overview
      */
     protected function activity_display($cid, $overview) {
-        $output = html_writer::start_tag('div', array('class' => 'activity_info'));
+        $output = html_writer::start_tag('div', ['class' => 'activity_info']);
         foreach (array_keys($overview) as $module) {
-            $output .= html_writer::start_tag('div', array('class' => 'activity_overview'));
-            $url = new moodle_url("/mod/$module/index.php", array('id' => $cid));
+            $output .= html_writer::start_tag('div', ['class' => 'activity_overview']);
+            $url = new moodle_url("/mod/$module/index.php", ['id' => $cid]);
             $modulename = get_string('modulename', $module);
             $icontext = html_writer::link($url, $this->output->pix_icon(
-                'icon', $modulename, 'mod_'.$module, array('class' => 'iconlarge')));
+                'icon', $modulename, 'mod_' . $module, ['class' => 'iconlarge']));
             if (get_string_manager()->string_exists("activityoverview", $module)) {
                 $icontext .= get_string("activityoverview", $module);
             } else {
@@ -278,11 +299,12 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             }
 
             // Add collapsible region with overview text in it.
-            $output .= $this->collapsible_region($overview[$module], '', 'region_'.$cid.'_'.$module, $icontext, '', true);
+            $output .= $this->collapsible_region($overview[$module], '', 'region_' . $cid . '_' . $module, $icontext, '', true);
 
             $output .= html_writer::end_tag('div');
         }
         $output .= html_writer::end_tag('div');
+
         return $output;
     }
 
@@ -290,21 +312,23 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Constructs header in editing mode
      *
      * @param int $max maximum number of courses
+     *
      * @return string html of header bar.
      */
     public function editing_bar_head($max = 0) {
         $output = $this->output->box_start('notice');
 
-        $options = array('0' => get_string('alwaysshowall', 'block_lw_courses'));
+        $options = ['0' => get_string('alwaysshowall', 'block_lw_courses')];
         for ($i = 1; $i <= $max; $i++) {
             $options[$i] = $i;
         }
         $url = new moodle_url('/my/index.php');
-        $select = new single_select($url, 'mynumber', $options, block_lw_courses_get_max_user_courses(), array());
+        $select = new single_select($url, 'mynumber', $options, block_lw_courses_get_max_user_courses(), []);
         $select->set_label(get_string('numtodisplay', 'block_lw_courses'));
         $output .= $this->output->render($select);
 
         $output .= $this->output->box_end();
+
         return $output;
     }
 
@@ -312,6 +336,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Show hidden courses count
      *
      * @param int $total count of hidden courses
+     *
      * @return string html
      */
     public function hidden_courses($total) {
@@ -323,17 +348,18 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         $config = get_config('block_lw_courses');
         // Show view all course link to user if forcedefaultmaxcourses is not empty.
         if (!empty($config->forcedefaultmaxcourses)) {
-            $output .= get_string('hiddencoursecount'.$plural, 'block_lw_courses', $total);
+            $output .= get_string('hiddencoursecount' . $plural, 'block_lw_courses', $total);
         } else {
             $a = new stdClass();
             $a->coursecount = $total;
             $a->showalllink = html_writer::link(new moodle_url('/my/index.php',
-                array('mynumber' => block_lw_courses::SHOW_ALL_COURSES)),
+                ['mynumber' => block_lw_courses::SHOW_ALL_COURSES]),
                 get_string('showallcourses'));
-            $output .= get_string('hiddencoursecountwithshowall'.$plural, 'block_lw_courses', $a);
+            $output .= get_string('hiddencoursecountwithshowall' . $plural, 'block_lw_courses', $a);
         }
 
         $output .= $this->output->box_end();
+
         return $output;
     }
 
@@ -341,16 +367,17 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Creates collapsable region
      *
      * @param string $contents existing contents
-     * @param string $classes class names added to the div that is output.
-     * @param string $id id added to the div that is output. Must not be blank.
-     * @param string $caption text displayed at the top. Clicking on this will cause the region to expand or contract.
+     * @param string $classes  class names added to the div that is output.
+     * @param string $id       id added to the div that is output. Must not be blank.
+     * @param string $caption  text displayed at the top. Clicking on this will cause the region to expand or contract.
      * @param string $userpref the name of the user preference that stores the user's preferred default state.
-     *      (May be blank if you do not wish the state to be persisted.
-     * @param bool $default Initial collapsed state to use if the user_preference it not set.
+     *                         (May be blank if you do not wish the state to be persisted.
+     * @param bool   $default  Initial collapsed state to use if the user_preference it not set.
+     *
      * @return bool if true, return the HTML as a string, rather than printing it.
      */
     protected function collapsible_region($contents, $classes, $id, $caption, $userpref = '', $default = false) {
-        $output  = $this->collapsible_region_start($classes, $id, $caption, $userpref, $default);
+        $output = $this->collapsible_region_start($classes, $id, $caption, $userpref, $default);
         $output .= $contents;
         $output .= $this->collapsible_region_end();
 
@@ -362,12 +389,13 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * be clicked to expand or collapse the region. If JavaScript is off, then the region
      * will always be expanded.
      *
-     * @param string $classes class names added to the div that is output.
-     * @param string $id id added to the div that is output. Must not be blank.
-     * @param string $caption text displayed at the top. Clicking on this will cause the region to expand or contract.
+     * @param string $classes  class names added to the div that is output.
+     * @param string $id       id added to the div that is output. Must not be blank.
+     * @param string $caption  text displayed at the top. Clicking on this will cause the region to expand or contract.
      * @param string $userpref the name of the user preference that stores the user's preferred default state.
-     *      (May be blank if you do not wish the state to be persisted.
-     * @param bool $default Initial collapsed state to use if the user_preference it not set.
+     *                         (May be blank if you do not wish the state to be persisted.
+     * @param bool   $default  Initial collapsed state to use if the user_preference it not set.
+     *
      * @return bool if true, return the HTML as a string, rather than printing it.
      */
     protected function collapsible_region_start($classes, $id, $caption, $userpref = '', $default = false) {
@@ -390,7 +418,11 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         $output .= '<div id="' . $id . '_caption" class="collapsibleregioncaption">';
         $output .= $caption . ' ';
         $output .= '</div><div id="' . $id . '_inner" class="collapsibleregioninner">';
-        $this->page->requires->js_init_call('M.block_lw_courses.collapsible', array($id, $userpref, get_string('clicktohideshow')));
+        $this->page->requires->js_init_call('M.block_lw_courses.collapsible', [
+            $id,
+            $userpref,
+            get_string('clicktohideshow'),
+        ]);
 
         return $output;
     }
@@ -402,6 +434,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      */
     protected function collapsible_region_end() {
         $output = '</div></div></div>';
+
         return $output;
     }
 
@@ -409,14 +442,15 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Creates html for welcome area
      *
      * @param int $msgcount number of messages
+     *
      * @return string html string for welcome area.
      */
     public function welcome_area($msgcount) {
         global $CFG, $USER;
         $output = $this->output->box_start('welcome_area');
 
-        $picture = $this->output->user_picture($USER, array('size' => 75, 'class' => 'welcome_userpicture'));
-        $output .= html_writer::tag('div', $picture, array('class' => 'profilepicture'));
+        $picture = $this->output->user_picture($USER, ['size' => 75, 'class' => 'welcome_userpicture']);
+        $output .= html_writer::tag('div', $picture, ['class' => 'profilepicture']);
 
         $output .= $this->output->box_start('welcome_message');
         $output .= $this->output->heading(get_string('welcome', 'block_lw_courses', $USER->firstname));
@@ -432,7 +466,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
                 $output .= get_string('youhavenomessages', 'block_lw_courses');
             }
             $output .= html_writer::link(new moodle_url('/message/index.php'),
-                get_string('message'.$plural, 'block_lw_courses'));
+                get_string('message' . $plural, 'block_lw_courses'));
         }
         $output .= $this->output->box_end();
         $output .= $this->output->box('', 'flush');
@@ -447,33 +481,35 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Get the image for a course if it exists
      *
      * @param object $course The course whose image we want
+     *
      * @return string|void
      */
-    public function course_image($course) {
+    public function course_image($courserecord) {
         global $CFG;
 
-        require_once($CFG->libdir.'/coursecatlib.php');
-        $course = new course_in_list($course);
+        require_once($CFG->libdir . '/coursecatlib.php');
+        $course = new course_in_list($courserecord);
         // Check to see if a file has been set on the course level.
         if ($course->id > 0 && $course->get_course_overviewfiles()) {
             foreach ($course->get_course_overviewfiles() as $file) {
                 $isimage = $file->is_valid_image();
                 $url = file_encode_url("$CFG->wwwroot/pluginfile.php",
-                    '/'. $file->get_contextid(). '/'. $file->get_component(). '/'.
-                    $file->get_filearea(). $file->get_filepath(). $file->get_filename(), !$isimage);
+                    '/' . $file->get_contextid() . '/' . $file->get_component() . '/' .
+                    $file->get_filearea() . $file->get_filepath() . $file->get_filename(), !$isimage);
                 if ($isimage) {
                     $config = get_config('block_lw_courses');
                     if (is_null($config->lw_courses_bgimage) ||
                         $config->lw_courses_bgimage == BLOCKS_LW_COURSES_IMAGEASBACKGROUND_FALSE) {
                         // Embed the image url as a img tag sweet...
                         $image = $this->enrolment_duration($course);
-                        $image .= html_writer::empty_tag('img', array('src' => $url, 'class' => 'course_image'));
+                        $image .= $this->flag($courserecord);
+                        $image .= html_writer::empty_tag('img', ['src' => $url, 'class' => 'course_image']);
 
                         return html_writer::div($image, 'image_wrap');
                     } else {
                         // We need a CSS soloution apparently lets give it to em.
                         return html_writer::div('', 'course_image_embed',
-                            array("style" => 'background-image:url('.$url.'); background-size:cover'));
+                            ["style" => 'background-image:url(' . $url . '); background-size:cover']);
                     }
                 } else {
                     return $this->course_image_defaults();
@@ -483,6 +519,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
             // Lets try to find some default images eh?.
             return $this->course_image_defaults();
         }
+
         // Where are the default at even?.
         return print_error('error');
     }
@@ -515,13 +552,15 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         // Do we need a CSS soloution or is a img good enough?.
         if (is_null($config->lw_courses_bgimage) || $config->lw_courses_bgimage == BLOCKS_LW_COURSES_IMAGEASBACKGROUND_FALSE) {
             // Embed the image url as a img tag sweet...
-            $image = html_writer::empty_tag('img', array( 'src' => $imageurl, 'class' => 'course_image' ));
+            $image = html_writer::empty_tag('img', ['src' => $imageurl, 'class' => 'course_image']);
+
             return html_writer::div($image, 'image_wrap');
         } else {
             // We need a CSS solution apparently lets give it to 'em.
             return html_writer::div('', 'course_image_embed',
-                array("style" => 'background-image:url('.$imageurl.'); background-size:cover'));
+                ["style" => 'background-image:url(' . $imageurl . '); background-size:cover']);
         }
+
         // Where are the default at even?.
         return print_error('filenotreadable');
     }
@@ -541,13 +580,13 @@ class block_lw_courses_renderer extends plugin_renderer_base {
 
         $context = \context_course::instance($course->id);
         $summary = external_format_string($course->summary, $context,
-            1, array());
+            1, []);
 
-        if(get_config('block_lw_courses' , 'displaybutton')){
-            $summary .= html_writer::link(new moodle_url('/course/view.php' , [
-                'id' => $course->id
-            ]) , get_string('viewcourse' , 'block_lw_courses') , [
-                'class' => 'btn btn-primary viewcourse'
+        if (get_config('block_lw_courses', 'displaybutton')) {
+            $summary .= html_writer::link(new moodle_url('/course/view.php', [
+                'id' => $course->id,
+            ]), get_string('viewcourse', 'block_lw_courses'), [
+                'class' => 'btn btn-primary viewcourse',
             ]);
         }
 
@@ -558,15 +597,16 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * Cut off the course description at a certain point
      *
      * @param string $s Initial String passed in
-     * @param int $l The length to cut it too
+     * @param int    $l The length to cut it too
      * @param string $e I am unsure
+     *
      * @return string
      */
     public function truncate_html($s, $l, $e = '&hellip;') {
         $s = trim($s);
         $e = (strlen(strip_tags($s)) > $l) ? $e : '';
         $i = 0;
-        $tags = array();
+        $tags = [];
 
         preg_match_all('/<[^>]+>([^<]*)/', $s, $m, PREG_OFFSET_CAPTURE | PREG_SET_ORDER);
         foreach ($m as $o) {
@@ -584,6 +624,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
 
         $output = substr($s, 0, $l = min(strlen($s), $l + $i)) .
             $e . (count($tags = array_reverse($tags)) ? '</' . implode('></', $tags) . '>' : '');
+
         return $output;
     }
 
@@ -595,7 +636,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      */
     private function enrolment_duration($course) {
 
-        if(empty($course->enrolment_end)){
+        if (empty($course->enrolment_end)) {
             return '';
         }
 
@@ -607,14 +648,23 @@ class block_lw_courses_renderer extends plugin_renderer_base {
 
         if ($days >= 30) {
             return '<span class="badge badge-default"> ' . get_string('enrolmentsends', 'block_lw_courses')
-                .' '. (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
+                . ' ' . (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
         }
 
         if ($days < 30) {
             return '<span class="badge badge-red"> ' . get_string('enrolmentsends', 'block_lw_courses')
-                .' '. (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
+                . ' ' . (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
         }
 
         return '';
+    }
+
+    /**
+     * @param stdClass $course
+     *
+     * @return string
+     */
+    private function flag(stdClass $course) {
+        return '<span class="flag ' . $course->locale_mapping . '"></span>';
     }
 }
