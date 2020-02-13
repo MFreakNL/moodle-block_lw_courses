@@ -111,5 +111,5 @@ $string['nocompletion'] = "Completion not enabled";
 
 $string['enrolmentsends'] = 'Access stops within';
 
-
 $string['privacy:metadata'] = 'The My Courses (lw_courses) block only shows information about courses and does not store data itself.';
+$string['nocourses_main_site'] = 'No courses found<br>Check the webshop <a href="/blocks/webshop/index.php/catalog/index">here</a>';

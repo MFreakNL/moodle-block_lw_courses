@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->dirroot.'/blocks/lw_courses/locallib.php');
+require_once($CFG->dirroot . '/blocks/lw_courses/locallib.php');
 
 /**
  * Course overview block
@@ -40,7 +40,7 @@ class block_lw_courses extends block_base {
      * Block initialization
      */
     public function init() {
-        $this->title   = get_string('pluginname', 'block_lw_courses');
+        $this->title = get_string('pluginname', 'block_lw_courses');
     }
 
     /**
@@ -53,7 +53,7 @@ class block_lw_courses extends block_base {
      */
     public function get_content() {
         global $USER, $CFG;
-        require_once($CFG->dirroot.'/user/profile/lib.php');
+        require_once($CFG->dirroot . '/user/profile/lib.php');
 
         if ($this->content !== null) {
             return $this->content;
@@ -77,7 +77,7 @@ class block_lw_courses extends block_base {
 
         $renderer = $this->page->get_renderer('block_lw_courses');
         if (!empty($config->showwelcomearea)) {
-            require_once($CFG->dirroot.'/message/lib.php');
+            require_once($CFG->dirroot . '/message/lib.php');
             $msgcount = message_count_unread_messages();
             $this->content->text = $renderer->welcome_area($msgcount);
         }
@@ -86,9 +86,15 @@ class block_lw_courses extends block_base {
         if ($this->page->user_is_editing() && empty($config->forcedefaultmaxcourses)) {
             $this->content->text .= $renderer->editing_bar_head($totalcourses);
         }
-
         if (empty($sortedcourses)) {
-            $this->content->text .= get_string('nocourses', 'my');
+
+            // Check if this is an whitelabel.
+            if (\block_webshop\site\site::get_active_site()->is_main_site() === false) {
+                $this->content->text .= get_string('nocourses', 'my');
+            } else {
+                $this->content->text .= get_string('nocourses_main_site', 'block_lw_courses');
+            }
+
         } else {
             // For each course, build category cache.
             $this->content->text .= $renderer->lw_courses($sortedcourses);
@@ -113,7 +119,7 @@ class block_lw_courses extends block_base {
      * @return array
      */
     public function applicable_formats() {
-        return array('all' => true);
+        return ['all' => true];
     }
 
     /**
@@ -125,6 +131,7 @@ class block_lw_courses extends block_base {
     public function hide_header() {
         // Hide header if welcome area is show.
         $config = get_config('block_lw_courses');
+
         return !empty($config->showwelcomearea);
     }
 
