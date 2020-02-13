@@ -47,6 +47,9 @@ class block_lw_courses extends block_base {
      * Return contents of lw_courses block
      *
      * @return stdClass contents of block
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
      */
     public function get_content() {
         global $USER, $CFG;
@@ -117,6 +120,7 @@ class block_lw_courses extends block_base {
      * Sets block header to be hidden or visible
      *
      * @return bool if true then header will be visible.
+     * @throws dml_exception
      */
     public function hide_header() {
         // Hide header if welcome area is show.

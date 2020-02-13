@@ -39,6 +39,9 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * @param array $courses list of courses in sorted order
      *
      * @return string html to be displayed in lw_courses block
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws moodle_exception
      */
     public function lw_courses($courses) {
         global $CFG, $PAGE, $DB, $OUTPUT;
@@ -665,6 +668,6 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * @return string
      */
     private function flag(stdClass $course) {
-        return '<span class="flag ' . $course->locale_mapping . '"></span>';
+        return '<span class="flag ' . $course->locale_display_flag . '"></span>';
     }
 }
