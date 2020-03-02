@@ -300,7 +300,6 @@ function block_lw_courses_get_my_courses($userId = 0, $fields = null, $sort = 's
 function block_lw_courses_get_sorted_courses($showallcourses = false) {
     global $USER , $DB;
 
-    $limit = block_lw_courses_get_max_user_courses($showallcourses);
     $courses = block_lw_courses_get_my_courses($USER->id);
     $mapping = $DB->get_records_menu('block_webshop_product' , [] ,'', 'course_id as id, locale_display_flag');
     $site = get_site();
@@ -336,27 +335,20 @@ function block_lw_courses_get_sorted_courses($showallcourses = false) {
     $counter = 0;
     // Get courses in sort order into list.
     foreach ($order as $key => $cid) {
-        if (($counter >= $limit) && ($limit != 0)) {
-            break;
-        }
 
         // Make sure user is still enrolled.
         if (isset($courses[$cid])) {
             $sortedcourses[$cid] = $courses[$cid];
-            $counter++;
         }
     }
     // Append unsorted courses if limit allows.
     foreach ($courses as $c) {
-        if (($limit != 0) && ($counter >= $limit)) {
-            break;
-        }
         if (!in_array($c->id, $order)) {
             $sortedcourses[$c->id] = $c;
-            $counter++;
         }
     }
-    return array($sortedcourses, count($courses));
+
+    return array($sortedcourses, count($sortedcourses));
 }
 
 // Custom LearningWorks functions.
