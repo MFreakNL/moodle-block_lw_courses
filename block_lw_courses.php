@@ -72,8 +72,7 @@ class block_lw_courses extends block_base {
 
         profile_load_custom_fields($USER);
 
-        $showallcourses = ($updatemynumber === self::SHOW_ALL_COURSES);
-        list($sortedcourses, $totalcourses) = block_lw_courses_get_sorted_courses($showallcourses);
+        list($sortedcourses, $totalcourses) = block_lw_courses_get_sorted_courses(true);
 
         $renderer = $this->page->get_renderer('block_lw_courses');
         if (!empty($config->showwelcomearea)) {

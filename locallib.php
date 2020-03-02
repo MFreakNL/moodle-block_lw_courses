@@ -329,26 +329,7 @@ function block_lw_courses_get_sorted_courses($showallcourses = false) {
         }
     }
 
-    $order = block_lw_courses_get_myorder();
-
-    $sortedcourses = array();
-    $counter = 0;
-    // Get courses in sort order into list.
-    foreach ($order as $key => $cid) {
-
-        // Make sure user is still enrolled.
-        if (isset($courses[$cid])) {
-            $sortedcourses[$cid] = $courses[$cid];
-        }
-    }
-    // Append unsorted courses if limit allows.
-    foreach ($courses as $c) {
-        if (!in_array($c->id, $order)) {
-            $sortedcourses[$c->id] = $c;
-        }
-    }
-
-    return array($sortedcourses, count($sortedcourses));
+    return array($courses, count($courses));
 }
 
 // Custom LearningWorks functions.
