@@ -72,7 +72,7 @@ class block_lw_courses extends block_base {
 
         profile_load_custom_fields($USER);
 
-        list($sortedcourses, $totalcourses) = block_lw_courses_get_sorted_courses(true);
+        [$sortedcourses, $totalcourses] = block_lw_courses_get_sorted_courses(true);
 
         $renderer = $this->page->get_renderer('block_lw_courses');
         if (!empty($config->showwelcomearea)) {
@@ -85,13 +85,18 @@ class block_lw_courses extends block_base {
         if ($this->page->user_is_editing() && empty($config->forcedefaultmaxcourses)) {
             $this->content->text .= $renderer->editing_bar_head($totalcourses);
         }
+
         if (empty($sortedcourses)) {
+            $activesite = \block_webshop\site\site::get_active_site();
 
             // Check if this is an whitelabel.
-            if (\block_webshop\site\site::get_active_site()->is_main_site() === false) {
-                $this->content->text .= get_string('nocourses', 'my');
+            if ($activesite->has_own_webshop() === false && $activesite->is_main_site() === false) {
+                $this->content->text .= html_writer::div(get_string('nocourses', 'my'), 'alert');
             } else {
-                $this->content->text .= get_string('nocourses_main_site', 'block_lw_courses');
+                $a = new stdClass();
+                $a->link = (new moodle_url('/blocks/webshop/index.php/catalog/index'))->out();
+                $this->content->text .= html_writer::div(
+                    get_string('nocourses_with_webshop', 'block_lw_courses', $a), 'alert');
             }
 
         } else {
