@@ -650,12 +650,12 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         $days = $dtF->diff($dtT)->format('%a');
 
         if ($days >= 30) {
-            return '<span class="badge badge-default"> ' . get_string('enrolmentsends', 'block_lw_courses')
+            return '<span class="badge badge-secondary"> ' . get_string('enrolmentsends', 'block_lw_courses')
                 . ' ' . (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
         }
 
         if ($days < 30) {
-            return '<span class="badge badge-red"> ' . get_string('enrolmentsends', 'block_lw_courses')
+            return '<span class="badge badge-danger"> ' . get_string('enrolmentsends', 'block_lw_courses')
                 . ' ' . (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
         }
 
