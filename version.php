@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 // Make sure they don't update this plugin, custom changes
 // https://github.com/MFreakNL/moodle-block_lw_courses
 // Works in Moodle 3.5
-$plugin->version   = 2022041203;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2022091701;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2018050800;        // Requires this Moodle version.
 $plugin->component = 'block_lw_courses'; // Full name of the plugin (used for diagnostics).
 $plugin->maturity = MATURITY_STABLE;

@@ -490,8 +490,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
     public function course_image($courserecord) {
         global $CFG;
 
-        require_once($CFG->libdir . '/coursecatlib.php');
-        $course = new course_in_list($courserecord);
+        $course = new core_course_list_element($courserecord);
         // Check to see if a file has been set on the course level.
         if ($course->id > 0 && $course->get_course_overviewfiles()) {
             foreach ($course->get_course_overviewfiles() as $file) {
@@ -579,7 +578,7 @@ class block_lw_courses_renderer extends plugin_renderer_base {
      * @throws moodle_exception
      */
     public function course_description($course) {
-        $course = new course_in_list($course);
+        $course = new core_course_list_element($course);
 
         $context = \context_course::instance($course->id);
         $summary = external_format_string($course->summary, $context,
@@ -650,12 +649,12 @@ class block_lw_courses_renderer extends plugin_renderer_base {
         $days = $dtF->diff($dtT)->format('%a');
 
         if ($days >= 30) {
-            return '<span class="badge badge-default"> ' . get_string('enrolmentsends', 'block_lw_courses')
+            return '<span class="badge badge-secondary"> ' . get_string('enrolmentsends', 'block_lw_courses')
                 . ' ' . (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
         }
 
         if ($days < 30) {
-            return '<span class="badge badge-red"> ' . get_string('enrolmentsends', 'block_lw_courses')
+            return '<span class="badge badge-danger"> ' . get_string('enrolmentsends', 'block_lw_courses')
                 . ' ' . (($days > 1) ? $days . ' ' . get_string('days') : $days . ' ' . get_string('day')) . '</span>';
         }
 

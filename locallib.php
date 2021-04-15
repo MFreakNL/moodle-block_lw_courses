@@ -301,7 +301,8 @@ function block_lw_courses_get_sorted_courses($showallcourses = false) {
     global $USER , $DB;
 
     $courses = block_lw_courses_get_my_courses($USER->id);
-    $mapping = $DB->get_records_menu('block_webshop_product' , [] ,'', 'course_id as id, locale_display_flag');
+    $mapping = $DB->get_records_menu('block_webshop_product' , [] ,'',
+        'course_id as id, locale_display_flag');
     $site = get_site();
 
     if (array_key_exists($site->id, $courses)) {
